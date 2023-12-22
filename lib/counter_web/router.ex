@@ -24,7 +24,8 @@ defmodule CounterWeb.Router do
 
     # 루트("/") 경로에 GET 요청을 일치시키는 경로입니다.
     # GET 요청이 "/"와 일치하면 PageController의 `home` 함수가 호출됩니다.
-    get "/", PageController, :home
+    # get "/", PageController, :home
+    live("/", Counter)
   end
 
   # Other scopes may use custom stacks.
