@@ -9,7 +9,11 @@ defmodule CounterWeb.Counter do
   if it comes from the database, an external API or others.
   """
   use CounterWeb, :live_view
-  @topic "live"
+  alias CounterWeb.Count
+  alias Phoenix.PubSub
+
+  @topic Count.topic()
+
   # CounterWeb 모듈에서 :live_view 관련 기능을 가져와 사용
 
   # mount 함수는 LiveView가 마운트될 때 호출됩니다.
@@ -64,11 +68,7 @@ defmodule CounterWeb.Counter do
   # ~H 시그릴은 HTML을 Elixir 코드 내에서 사용할 수 있습니다.
   def render(assigns) do
     ~H"""
-    <div class="text-center">
-      <h1 class="teext-4xl font-bold text-center">Count: <%= @val %></h1>
-      <.button phx-click="dec">-</.button>
-      <.button phx-click="inc">+</.button>
-    </div>
+    <.live_component module={CounterComponent} id="counter" val={@val} />
     """
   end
 end

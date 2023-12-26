@@ -8,6 +8,7 @@ defmodule Counter.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      Counter.Count,
       CounterWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:counter, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Counter.PubSub},
