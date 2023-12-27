@@ -9,10 +9,13 @@ defmodule CounterWeb.Counter do
   if it comes from the database, an external API or others.
   """
   use CounterWeb, :live_view
+
   alias Counter.Count
   alias Phoenix.PubSub
+  alias Counter.Presence
 
   @topic Count.topic()
+  @presence_topic "presence"
 
   # CounterWeb 모듈에서 :live_view 관련 기능을 가져와 사용
 
@@ -24,10 +27,17 @@ defmodule CounterWeb.Counter do
     # 특정 토픽에 대한 구독을 설정합니다.
     PubSub.subscribe(Counter.PubSub, @topic)
 
+    Presence.track(self(), @presence_topic, socket.id, %{})
+    CounterWeb.Endpoint.subscribe(@presence_topic)
+
+    initial_present =
+      Presence.list(@presence_topic)
+      |> map_size
+
+    {:ok, assign(socket, val: Count.current(), present: initial_present)}
+
     # 상태를 설정합니다.
     # :val 이라는 키를 가진 상태를 할당하고, 그 값으로 0을 할당합니다.
-
-    {:ok, assign(socket, val: Count.current())}
   end
 
   # handle_event 함수는 특정 이벤트를 처리합니다.
@@ -56,15 +66,21 @@ defmodule CounterWeb.Counter do
     {:noreply, assign(socket, val: count)}
   end
 
+  def handle_info(
+        %{event: "presence_diff", payload: %{joins: joins, leaves: leaves}},
+        %{assigns: %{present: present}} = socket
+      ) do
+    new_present = present + map_size(joins) - map_size(leaves)
+    {:noreply, assign(socket, :present, new_present)}
+  end
+
   # render 함수는 LiveView의 HTML을 렌더링합니다.
   # ~H 시그릴은 HTML을 Elixir 코드 내에서 사용할 수 있습니다.
   def render(assigns) do
     ~H"""
-    <div>
-      <h1>The count is: <%= @val %></h1>
-      <.button phx-click="dec">-</.button>
-      <.button phx-click="inc">+</.button>
-    </div>
+    <.live_component module={CounterComponent} id="counter" val={@val} />
+
+    <.live_component module={PresenceComponent} id="presence" present={@present} />
     """
   end
 end
