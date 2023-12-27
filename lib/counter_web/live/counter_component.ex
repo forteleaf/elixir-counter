@@ -19,4 +19,3 @@ defmodule CounterComponent do
     """
   end
 end
-

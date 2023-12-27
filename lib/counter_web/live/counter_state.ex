@@ -31,7 +31,7 @@ defmodule Counter.Count do
   end
 
   def current() do
-    GenServer.call(@name, :currnet)
+    GenServer.call(@name, :current)
   end
 
   def init(start_count) do
@@ -56,4 +56,3 @@ defmodule Counter.Count do
     {:reply, new_count, new_count}
   end
 end
-
